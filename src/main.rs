@@ -19,7 +19,8 @@ fn main() {
     }
 
     println!("{:#06x?}", program);
+    println!("{}", program.len());
 
-    let interpretor = Interpretor::new(program);
+    let interpretor = Interpretor::new(buffer);
 }
  

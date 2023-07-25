@@ -1,19 +1,21 @@
 use crate::display::Display;
 
 pub struct Interpretor {
-    program: Vec<u16>,
+    program: Vec<u8>,
     screen: Display,
     registers: [u8; 16],
-    l: u16
+    i: u16,
+	pc: usize
 }
 
 impl Interpretor {
-	pub fn new(program: Vec<u16>) -> Interpretor {
+	pub fn new(program: Vec<u8>) -> Interpretor {
 		Interpretor {
 			program: program,
 			screen: Display::new(64, 32),
 			registers: [0; 16],
-			l: 0
+			i: 0,
+			pc: 0
 		}
 	}
 
