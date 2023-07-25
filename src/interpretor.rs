@@ -36,7 +36,10 @@ impl Interpretor {
 
 		match first_byte {
 			0x0000 => self.decode_0(op),
-			0x1000 => { println!("Need {:#06x?} opcode", op) },
+			0x1000 => { 
+				// 0x1NNN
+				self.pc = usize::from((op & 0x0FFF) / 8) / 2; // Not sure
+			},
 			0x2000 => { println!("Need {:#06x?} opcode", op) },
 			0x3000 => { println!("Need {:#06x?} opcode", op) },
 			0x4000 => { println!("Need {:#06x?} opcode", op) },
