@@ -16,6 +16,14 @@ impl Memory {
 		self.buffer.len()
 	}
 
+	pub fn read(&self, adress: usize) -> u8 {
+		self.buffer[adress]
+	}
+
+	pub fn read_bytes(&self, adress: usize, n: usize) -> &[u8] {
+		&self.buffer[adress..adress+n]
+	}
+
 	pub fn read_opcode(&self, adress: usize) -> u16 {
 		let mut op : u16 = 0u16;
         op += u16::from(self.buffer[adress]) << 8;
@@ -24,7 +32,7 @@ impl Memory {
 		op
 	}
 
-	pub fn read_bytes(&self, adress: usize, n: usize) -> &[u8] {
-		&self.buffer[adress..adress+n]
+	pub fn write(&mut self, adress: usize, byte: u8) {
+		self.buffer[adress] = byte;
 	}
 }
