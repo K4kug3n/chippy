@@ -4,7 +4,7 @@ pub struct Memory {
 
 impl Memory {
 	pub fn new(program: &[u8]) -> Memory {
-		let mut buffer: Vec<u8> = Vec::from(vec![0; 64]); // Interpreter memory
+		let mut buffer: Vec<u8> = Vec::from(vec![0; 512]); // Interpreter memory
 		buffer.extend_from_slice(program);
 
 		Memory { 
@@ -17,20 +17,14 @@ impl Memory {
 	}
 
 	pub fn read_opcode(&self, adress: usize) -> u16 {
-		//debug_assert!(adress % 8 == 0); Not normal, WIP
-		let idx = adress / 8;
-
 		let mut op : u16 = 0u16;
-        op += u16::from(self.buffer[idx]) << 8;
-        op += u16::from(self.buffer[idx + 1]);
+        op += u16::from(self.buffer[adress]) << 8;
+        op += u16::from(self.buffer[adress + 1]);
 
 		op
 	}
 
 	pub fn read_bytes(&self, adress: usize, n: usize) -> &[u8] {
-		//debug_assert!(adress % 8 == 0); Not normal, WIP
-		let idx = adress / 8;
-
-		&self.buffer[idx..idx+n]
+		&self.buffer[adress..adress+n]
 	}
 }
