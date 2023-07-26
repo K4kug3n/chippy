@@ -20,18 +20,22 @@ impl Interpretor {
 		}
 	}
 
-	pub fn run(&mut self) {
-		let mut cycle = 0;
-		while self.pc != self.memory.len() {
-			let op : u16 = self.memory.read_opcode(self.pc);
+	pub fn screen_width(&self) -> usize {
+		usize::from(self.screen.width())
+	}
 
-            self.decode(op);
+	pub fn screen_height(&self) -> usize {
+		usize::from(self.screen.height())
+	}
 
-			println!("{:#06x?}", op);
+	pub fn screen_value(&self, x: usize, y: usize) -> u8 {
+		self.screen.get(x, y)
+	}
 
-            self.pc += 16;
-			cycle += 1;
-		}
+	pub fn cycle(&mut self) {
+		let op : u16 = self.memory.read_opcode(self.pc);
+		self.decode(op);
+		self.pc += 16;
 	}
 
 	fn decode(&mut self, op: u16) {
