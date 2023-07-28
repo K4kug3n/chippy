@@ -6,6 +6,9 @@ pub struct Interpretor {
     screen: Display,
     registers: [u8; 16],
 	stack: Vec<u16>,
+	keys: [bool; 16],
+	delay_timer: u8,
+	sound_timer: u8,
     i: u16,
 	pc: usize
 }
@@ -17,24 +20,21 @@ impl Interpretor {
 			screen: Display::new(64, 32),
 			registers: [0; 16],
 			stack: Vec::new(),
+			keys: [false; 16],
+			delay_timer: 0,
+			sound_timer: 0,
 			i: 0,
 			pc: 0x200
 		}
 	}
 
-	pub fn screen_width(&self) -> usize {
-		usize::from(self.screen.width())
-	}
-
-	pub fn screen_height(&self) -> usize {
-		usize::from(self.screen.height())
-	}
-
-	pub fn screen_value(&self, x: usize, y: usize) -> u8 {
-		self.screen.get(x, y)
+	pub fn clear_inputs(&mut self) {
+		self.keys.fill(false);
 	}
 
 	pub fn cycle(&mut self) {
+		self.update_timers();
+
 		let op : u16 = self.memory.read_opcode(self.pc);
 		self.decode(op);
 		self.pc += 2;
@@ -209,9 +209,30 @@ impl Interpretor {
 		let last_2_bytes = op & 0x00FF;
 		let vx = usize::from((op & 0x0F00) >> 8);
 		match last_2_bytes {
+			0x07 => {
+				self.registers[vx] = self.delay_timer;
+			},
+			0x0A => { 
+				// if self.keys.into_iter().any(|x| x) {
+				// 	let key = self.keys.into_iter().position(|x| x).unwrap();
+
+				// 	self.registers[vx] = u8::try_from(key).unwrap();
+				// }
+				// else {
+				// 	self.pc -= 2; // Block on this opcode
+				// }
+				println!("Need {:#06x?} opcode", op)
+			},
+			0x15 => { 
+				self.delay_timer = self.registers[vx];
+			},
+			0x18 => { 
+				self.sound_timer = self.registers[vx];
+			},
 			0x1E => { 
 				self.i += u16::from(self.registers[vx])
 			},
+			0x29 => { println!("Need {:#06x?} opcode", op) },
 			0x33 => {
 				let value = self.registers[vx];
 
@@ -234,6 +255,34 @@ impl Interpretor {
 				}
 			},
 			_ => println!("{:#06x?} not managed", op)
+		}
+	}
+
+	pub fn set_pressed(&mut self, key: usize) {
+		debug_assert!(key < self.keys.len());
+		
+		self.keys[key] = true;
+	}
+
+	pub fn screen_width(&self) -> usize {
+		usize::from(self.screen.width())
+	}
+
+	pub fn screen_height(&self) -> usize {
+		usize::from(self.screen.height())
+	}
+
+	pub fn screen_value(&self, x: usize, y: usize) -> u8 {
+		self.screen.get(x, y)
+	}
+
+	fn update_timers(&mut self) {
+		if self.delay_timer != 0 {
+			self.delay_timer -= 1;
+		}
+
+		if self.sound_timer != 0 {
+			self.sound_timer -= 1;
 		}
 	}
 }
