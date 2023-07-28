@@ -28,10 +28,6 @@ impl Interpretor {
 		}
 	}
 
-	pub fn clear_inputs(&mut self) {
-		self.keys.fill(false);
-	}
-
 	pub fn cycle(&mut self) {
 		self.update_timers();
 
@@ -121,7 +117,7 @@ impl Interpretor {
 				let y = self.registers[vy_idx];
 				self.screen.draw(x, y, sprite);
 			},
-			0xE000 => { println!("Need {:#06x?} opcode", op) },
+			0xE000 => self.decode_e(op),
 			0xF000 => self.decode_f(op),
 			_ => println!("{:#06x?} not managed", op)
 		}
@@ -146,12 +142,15 @@ impl Interpretor {
 		match last_byte {
 			0x0 => {
 				self.registers[vx] = self.registers[vy];
+				self.registers[0xF] = 0;
 			},
 			0x1 => {
 				self.registers[vx] |= self.registers[vy];
+				self.registers[0xF] = 0;
 			},
 			0x2 => {
 				self.registers[vx] &= self.registers[vy];
+				self.registers[0xF] = 0;
 			},
 			0x3 => {
 				self.registers[vx] ^= self.registers[vy];
@@ -201,6 +200,25 @@ impl Interpretor {
 				self.registers[vx] = (self.registers[vx] & 0x7F) << 1;
 				self.registers[0xF] = flag;
 			},
+			_ => println!("{:#06x?} not managed", op)
+		}
+	}
+
+	fn decode_e(&mut self, op: u16) {
+		let last_bytes = op & 0x00FF;
+		let vx = usize::from((op & 0x0F00) >> 8);
+		let key = usize::from(self.registers[vx]);
+		match last_bytes {
+			0x009E => {
+				if self.keys[key] {
+					self.pc += 2; // Skip next opcode
+				}
+			}
+			0x00A1 => {
+				if !self.keys[key] {
+					self.pc += 2; // Skip next opcode
+				}
+			}
 			_ => println!("{:#06x?} not managed", op)
 		}
 	}
@@ -262,6 +280,12 @@ impl Interpretor {
 		debug_assert!(key < self.keys.len());
 		
 		self.keys[key] = true;
+	}
+
+	pub fn set_released(&mut self, key: usize) {
+		debug_assert!(key < self.keys.len());
+		
+		self.keys[key] = false;
 	}
 
 	pub fn screen_width(&self) -> usize {
