@@ -20,28 +20,42 @@ impl Display {
 		self.buffer = vec![0; self.buffer.len()];
 	}
 
-	pub fn draw(&mut self, x: u8, y: u8, sprite: &[u8]) -> bool {
-		//debug_assert!(x < self.width && y < self.height);
+	pub fn draw(&mut self, mut x: u8, mut y: u8, sprite: &[u8]) -> bool {
+		x %= self.width;
+		y %= self.height;
 
 		let mut collide = false;
 
+		let byte_width = usize::from(self.width) / 8;
 		let shift = x % 8;
-		for i in 0..sprite.len() {
-			let first_part = usize::from(x - shift);
-			let first_before = self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + first_part / 8];
-			let first_after = first_before ^ (sprite[i] >> shift);
-			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + first_part / 8] = first_after;
+		let first_part = usize::from(x - shift) / 8;
+		let second_part = usize::from(x + 8 - shift) / 8;
 
-			let second_part = usize::from((x + 8 - shift) % self.width);
-			let mut second_value = sprite[i];
-			for _ in 0..(8 - shift) {
-				second_value = (second_value & 0x7F) << 1;
+		for i in 0..sprite.len() {
+			let y_curr: usize = usize::from(y) + i;
+			if y_curr >= usize::from(self.height) {
+				break;
 			}
-			let second_before = self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8];
-			let second_after = second_before ^ second_value;
-			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8] = second_after;
 			
-			if !collide && (check_collide(first_before, first_after) || check_collide(second_before, second_after)) {
+			let first_before = self.buffer[y_curr * byte_width + first_part];
+			let first_after = first_before ^ (sprite[i] >> shift);
+			self.buffer[y_curr * byte_width + first_part] = first_after;
+			
+			if second_part < byte_width {
+				let mut second_value = sprite[i];
+				for _ in 0..(8 - shift) {
+					second_value = (second_value & 0x7F) << 1;
+				}
+				let second_before = self.buffer[y_curr * byte_width + second_part];
+				let second_after = second_before ^ second_value;
+				self.buffer[y_curr * byte_width + second_part] = second_after;
+
+				if !collide && check_collide(second_before, second_after) {
+					collide = true;
+				}
+			}
+			
+			if !collide && check_collide(first_before, first_after) {
 				collide = true;
 			}
 
@@ -109,13 +123,23 @@ mod tests {
     }
 
 	#[test]
-    fn test_overflow_draw() {
+    fn test_wrap_draw() {
         let mut screen = Display::new(16, 2);
-        let sprite : Vec<u8> = vec![0xFF, 0xAE];
+        let sprite : Vec<u8> = vec![0x12, 0xAE];
 
-        screen.draw(8, 1, &sprite);
+        screen.draw(16, 2, &sprite);
 
-        assert_eq!(screen.buffer, vec![0x00, 0xAE, 0x00, 0xFF]);
+        assert_eq!(screen.buffer, vec![0x12, 0x00, 0xAE, 0x00]);
+    }
+
+	#[test]
+    fn test_clip_draw() {
+        let mut screen = Display::new(16, 2);
+        let sprite : Vec<u8> = vec![0xFF, 0xFF];
+
+        screen.draw(10, 1, &sprite);
+
+        assert_eq!(screen.buffer, vec![0x00, 0x00, 0x00, 0x3F]);
     }
 
 	#[test]
