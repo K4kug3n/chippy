@@ -1,6 +1,8 @@
 use crate::display::Display;
 use crate::memory::Memory;
 
+use rand::Rng;
+
 pub struct Interpretor {
     memory: Memory,
     screen: Display,
@@ -113,7 +115,15 @@ impl Interpretor {
 				let value = op & 0x0FFF;
 				self.pc = usize::from(self.registers[0]) + usize::from(value) - 2;	
 			},
-			0xC000 => { println!("Need {:#06x?} opcode", op) },
+			0xC000 => {
+				// 0xCXNN
+				let mut rng = rand::thread_rng();
+				let rnd_value: u8 = rng.gen();
+				let value = u8::try_from(op & 0x00FF).unwrap();
+
+				let vx = usize::from(op & 0x0F00 >> 8);
+				self.registers[vx] = rnd_value ^ value;
+			},
 			0xD000 => {
 				// 0xDXYN
 				let n = usize::from(op & 0x000F);
