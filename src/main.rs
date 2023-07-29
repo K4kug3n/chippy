@@ -74,22 +74,25 @@ fn main() {
 
         interpretor.cycle();
 
-        for y in 0..interpretor.screen_height() {
-            let window_y = y * PIXEL_SIZE;
-            for x in 0..interpretor.screen_width() {
-                let window_x = x * PIXEL_SIZE;
-
-                let color = if interpretor.screen_value(x, y) != 0 { 0x096096FF } else { 0x09609680 };
-
-                for j in 0..PIXEL_SIZE {
-                    for i in 0..PIXEL_SIZE {
-                        pixels[(window_y + j) * window_width + window_x + i] = color;
+        if interpretor.has_drawn() {
+            for y in 0..interpretor.screen_height() {
+                let window_y = y * PIXEL_SIZE;
+                for x in 0..interpretor.screen_width() {
+                    let window_x = x * PIXEL_SIZE;
+    
+                    let color = if interpretor.screen_value(x, y) != 0 { 0x096096FF } else { 0x09609680 };
+    
+                    for j in 0..PIXEL_SIZE {
+                        for i in 0..PIXEL_SIZE {
+                            pixels[(window_y + j) * window_width + window_x + i] = color;
+                        }
                     }
                 }
             }
         }
 
         window.update_with_buffer(&pixels, window_width, window_height).unwrap();
+        
     }
 }
  

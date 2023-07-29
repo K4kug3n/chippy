@@ -9,6 +9,7 @@ pub struct Interpretor {
 	keys: [bool; 16],
 	delay_timer: u8,
 	sound_timer: u8,
+	has_drawn: bool,
     i: u16,
 	pc: usize
 }
@@ -23,6 +24,7 @@ impl Interpretor {
 			keys: [false; 16],
 			delay_timer: 0,
 			sound_timer: 0,
+			has_drawn: false,
 			i: 0,
 			pc: 0x200
 		}
@@ -30,6 +32,7 @@ impl Interpretor {
 
 	pub fn cycle(&mut self) {
 		self.update_timers();
+		self.has_drawn = false;
 
 		let op : u16 = self.memory.read_opcode(self.pc);
 		self.decode(op);
@@ -118,7 +121,12 @@ impl Interpretor {
 
 				let x = self.registers[vx_idx];
 				let y = self.registers[vy_idx];
-				self.screen.draw(x, y, sprite);
+				if self.screen.draw(x, y, sprite) {
+					// Collision detected
+					self.registers[0xF] = 1;
+				}
+
+				self.has_drawn = true;
 			},
 			0xE000 => self.decode_e(op),
 			0xF000 => self.decode_f(op),
@@ -278,6 +286,10 @@ impl Interpretor {
 			},
 			_ => println!("{:#06x?} not managed", op)
 		}
+	}
+
+	pub fn has_drawn(&self) -> bool {
+		self.has_drawn
 	}
 
 	pub fn set_pressed(&mut self, key: usize) {

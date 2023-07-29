@@ -20,21 +20,34 @@ impl Display {
 		self.buffer = vec![0; self.buffer.len()];
 	}
 
-	pub fn draw(&mut self, x: u8, y: u8, sprite: &[u8]) {
-		debug_assert!(x < self.width && y < self.height);
+	pub fn draw(&mut self, x: u8, y: u8, sprite: &[u8]) -> bool {
+		//debug_assert!(x < self.width && y < self.height);
+
+		let mut collide = false;
 
 		let shift = x % 8;
 		for i in 0..sprite.len() {
 			let first_part = usize::from(x - shift);
-			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + first_part / 8] ^= sprite[i] >> shift;
+			let first_before = self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + first_part / 8];
+			let first_after = first_before ^ (sprite[i] >> shift);
+			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + first_part / 8] = first_after;
 
 			let second_part = usize::from((x + 8 - shift) % self.width);
 			let mut second_value = sprite[i];
 			for _ in 0..(8 - shift) {
 				second_value = (second_value & 0x7F) << 1;
 			}
-			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8] ^= second_value;
+			let second_before = self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8];
+			let second_after = second_before ^ second_value;
+			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8] = second_after;
+			
+			if !collide && (check_collide(first_before, first_after) || check_collide(second_before, second_after)) {
+				collide = true;
+			}
+
 		}
+
+		collide
 	}
 
 	pub fn get(&self, x: usize, y: usize) -> u8 
@@ -56,6 +69,19 @@ impl Display {
 	pub fn width(&self) -> u8 {
 		self.width
 	}
+}
+
+fn check_collide(mut before: u8, mut after: u8) -> bool {
+	for _ in 0..8 {
+		if (before & 0x1) == 1 && (after & 0x1) == 0 {
+			return true
+		}
+
+		before >>= 1;
+		after >>= 1;
+	}
+
+	return false;
 }
 
 #[cfg(test)]
