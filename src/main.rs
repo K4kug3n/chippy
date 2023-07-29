@@ -9,7 +9,7 @@ use rodio::{OutputStream, Sink};
 use rodio::source::{SineWave, Source};
 
 fn main() {
-    let mut file = File::open("examples/2-ibm-logo.ch8").expect("Could not read the file {}");
+    let mut file = File::open("examples/PONG.ch8").expect("Could not read the file {}");
     
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).expect("Could not read bytes");
