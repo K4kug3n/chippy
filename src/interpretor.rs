@@ -109,7 +109,7 @@ impl Interpretor {
 			},
 			0xB000 => { 
 				let value = op & 0x0FFF;
-				self.pc = usize::from(self.registers[0]) + usize::from(value);	
+				self.pc = usize::from(self.registers[0]) + usize::from(value) - 2;	
 			},
 			0xC000 => { println!("Need {:#06x?} opcode", op) },
 			0xD000 => {
