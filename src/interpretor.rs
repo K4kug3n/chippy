@@ -266,12 +266,14 @@ impl Interpretor {
 			},
 			0x55 => {
 				for i in 0..=vx {
-					self.memory.write(usize::from(self.i) + i, self.registers[i]);
+					self.memory.write(usize::from(self.i), self.registers[i]);
+					self.i += 1; // original implementation
 				}
 			},
 			0x65 => {
 				for i in 0..=vx {
-					self.registers[i] = self.memory.read(usize::from(self.i) + i);
+					self.registers[i] = self.memory.read(usize::from(self.i));
+					self.i += 1; // original implementation
 				}
 			},
 			_ => println!("{:#06x?} not managed", op)
