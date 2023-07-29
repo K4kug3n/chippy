@@ -1,8 +1,12 @@
 use std::io::prelude::*;
 use std::fs::File;
+use std::time::Duration;
 
 use chippy::interpretor::Interpretor;
+
 use minifb::{Key, Window, WindowOptions};
+use rodio::{OutputStream, Sink};
+use rodio::source::{SineWave, Source};
 
 fn main() {
     let mut file = File::open("examples/2-ibm-logo.ch8").expect("Could not read the file {}");
@@ -11,6 +15,9 @@ fn main() {
     file.read_to_end(&mut buffer).expect("Could not read bytes");
 
     let mut interpretor = Interpretor::new(buffer);
+
+    let (_stream, stream_handle) = OutputStream::try_default().unwrap();
+    let sink = Sink::try_new(&stream_handle).unwrap();
 
     const PIXEL_SIZE : usize = 16;
     let window_width = interpretor.screen_width() * PIXEL_SIZE;
@@ -26,7 +33,7 @@ fn main() {
         panic!("{}", e);
     });
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
+    while window.is_open() && !window.is_key_down(Key::Escape) && !interpretor.is_finished() {
         
         window.get_keys_pressed(minifb::KeyRepeat::No).iter().for_each(|key|
             match key {
@@ -73,6 +80,12 @@ fn main() {
         );
 
         interpretor.cycle();
+
+        if interpretor.is_beeping() {
+            let source = SineWave::new(440.0).take_duration(Duration::from_secs_f32(0.02)).amplify(0.20);
+
+            sink.append(source);
+        }
 
         if interpretor.has_drawn() {
             for y in 0..interpretor.screen_height() {
