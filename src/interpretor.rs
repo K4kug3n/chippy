@@ -145,7 +145,6 @@ impl Interpretor {
 		match last_byte {
 			0x0 => {
 				self.registers[vx] = self.registers[vy];
-				self.registers[0xF] = 0;
 			},
 			0x1 => {
 				self.registers[vx] |= self.registers[vy];
@@ -157,6 +156,7 @@ impl Interpretor {
 			},
 			0x3 => {
 				self.registers[vx] ^= self.registers[vy];
+				self.registers[0xF] = 0;
 			},
 			0x4 => {
 				let res = u8::overflowing_add(self.registers[vx], self.registers[vy]);
