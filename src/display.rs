@@ -10,9 +10,9 @@ impl Display {
 		let buffer = vec![0; ((usize::from(width) * usize::from(height)) + 7) / 8];
 
 		Display {
-			width: width,
-			height: height,
-			buffer: buffer
+			width,
+			height,
+			buffer
 		}
 	}
 
@@ -31,18 +31,18 @@ impl Display {
 		let first_part = usize::from(x - shift) / 8;
 		let second_part = usize::from(x + 8 - shift) / 8;
 
-		for i in 0..sprite.len() {
+		for (i, sprite_value) in sprite.iter().enumerate() {
 			let y_curr: usize = usize::from(y) + i;
 			if y_curr >= usize::from(self.height) {
 				break;
 			}
 			
 			let first_before = self.buffer[y_curr * byte_width + first_part];
-			let first_after = first_before ^ (sprite[i] >> shift);
+			let first_after = first_before ^ (sprite_value >> shift);
 			self.buffer[y_curr * byte_width + first_part] = first_after;
 			
 			if second_part < byte_width {
-				let mut second_value = sprite[i];
+				let mut second_value = *sprite_value;
 				for _ in 0..(8 - shift) {
 					second_value = (second_value & 0x7F) << 1;
 				}
@@ -71,9 +71,8 @@ impl Display {
 		let x_idx = (x - offset) / 8;
 
 		let byte = self.buffer[y * usize::from(self.width) / 8 + x_idx];
-		let value = (byte >> (8 - 1 - offset)) & 0x01;
 
-		value
+		(byte >> (8 - 1 - offset)) & 0x01
 	}
 
 	pub fn height(&self) -> u8 {
@@ -95,7 +94,7 @@ fn check_collide(mut before: u8, mut after: u8) -> bool {
 		after >>= 1;
 	}
 
-	return false;
+	false
 }
 
 #[cfg(test)]

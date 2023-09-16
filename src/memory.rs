@@ -4,7 +4,7 @@ pub struct Memory {
 
 impl Memory {
 	pub fn new(program: &[u8]) -> Memory {
-		let mut buffer: Vec<u8> = Vec::from(vec![0; 512]); // Interpreter memory
+		let mut buffer: Vec<u8> = vec![0; 512]; // Interpreter memory
 
 		buffer[..80].copy_from_slice(&[
 			0xF0, 0x90, 0x90, 0x90, 0xF0,       // 0
@@ -28,14 +28,14 @@ impl Memory {
 		buffer.extend_from_slice(program);
 
 		Memory { 
-			buffer: buffer
+			buffer
 		}
 	}
 
 	pub fn get_font_adress(&self, font: u8) -> usize {
 		debug_assert!(font < 16);
 
-		return usize::from(font) * 5;
+		usize::from(font) * 5
 	}
 
 	pub fn len(&self) -> usize {
