@@ -20,8 +20,8 @@ fn main() {
     let sink = Sink::try_new(&stream_handle).unwrap();
 
     const PIXEL_SIZE : usize = 16;
-    let window_width = interpretor.screen_width() * PIXEL_SIZE;
-    let window_height = interpretor.screen_height() * PIXEL_SIZE;
+    let window_width = usize::from(interpretor.screen.width()) * PIXEL_SIZE;
+    let window_height = usize::from(interpretor.screen.height()) * PIXEL_SIZE;
     let mut pixels: Vec<u32> = vec![0; window_width * window_height];
     
     let mut window = Window::new(
@@ -90,12 +90,12 @@ fn main() {
         }
 
         if interpretor.has_drawn() {
-            for y in 0..interpretor.screen_height() {
+            for y in 0..usize::from(interpretor.screen.height()) {
                 let window_y = y * PIXEL_SIZE;
-                for x in 0..interpretor.screen_width() {
+                for x in 0..usize::from(interpretor.screen.width()) {
                     let window_x = x * PIXEL_SIZE;
     
-                    let color = if interpretor.screen_value(x, y) != 0 { 0x096096FF } else { 0x09609680 };
+                    let color = if interpretor.screen.get(x, y) != 0 { 0x096096FF } else { 0x09609680 };
     
                     for j in 0..PIXEL_SIZE {
                         for i in 0..PIXEL_SIZE {

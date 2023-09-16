@@ -4,8 +4,8 @@ use crate::memory::Memory;
 use rand::Rng;
 
 pub struct Interpretor {
+	pub screen: Display,
     memory: Memory,
-    screen: Display,
     registers: [u8; 16],
 	stack: Vec<u16>,
 	keys: [bool; 16],
@@ -335,18 +335,6 @@ impl Interpretor {
 		debug_assert!(key < self.keys.len());
 		
 		self.keys[key] = false;
-	}
-
-	pub fn screen_width(&self) -> usize {
-		usize::from(self.screen.width())
-	}
-
-	pub fn screen_height(&self) -> usize {
-		usize::from(self.screen.height())
-	}
-
-	pub fn screen_value(&self, x: usize, y: usize) -> u8 {
-		self.screen.get(x, y)
 	}
 
 	fn update_timers(&mut self) {
