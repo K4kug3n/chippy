@@ -56,6 +56,7 @@ impl Interpretor {
 				
 				let adress = op & 0x0FFF;
 				self.pc = usize::from(adress);
+				self.pc -= 2; // Prepare increment
 			},
 			0x3000 => { 
 				// 0x3XNN
