@@ -104,7 +104,10 @@ impl Interpretor {
 				// 0xANNN
 				self.i = op & 0x0FFF;
 			},
-			0xB000 => { println!("Need {:#06x?} opcode", op) },
+			0xB000 => { 
+				let value = op & 0x0FFF;
+				self.pc = usize::from(self.registers[0]) + usize::from(value);	
+			},
 			0xC000 => { println!("Need {:#06x?} opcode", op) },
 			0xD000 => {
 				// 0xDXYN
@@ -231,15 +234,14 @@ impl Interpretor {
 				self.registers[vx] = self.delay_timer;
 			},
 			0x0A => { 
-				// if self.keys.into_iter().any(|x| x) {
-				// 	let key = self.keys.into_iter().position(|x| x).unwrap();
+				if self.keys.into_iter().any(|x| x) {
+					let key = self.keys.into_iter().position(|x| x).unwrap();
 
-				// 	self.registers[vx] = u8::try_from(key).unwrap();
-				// }
-				// else {
-				// 	self.pc -= 2; // Block on this opcode
-				// }
-				println!("Need {:#06x?} opcode", op)
+					self.registers[vx] = u8::try_from(key).unwrap();
+				}
+				else {
+					self.pc -= 2; // Block on this opcode
+				}
 			},
 			0x15 => { 
 				self.delay_timer = self.registers[vx];
