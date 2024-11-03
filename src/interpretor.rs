@@ -190,7 +190,7 @@ impl Interpretor {
 			},
 			0x6 => {
 				let flag = self.registers[vy] & 1; // Least significant bit
-				self.registers[vx] >>= 1;
+				self.registers[vx] = self.registers[vy] >> 1;
 
 				self.registers[0xF] = flag;
 				
@@ -207,8 +207,8 @@ impl Interpretor {
 				}
 			},
 			0xE => {
-				let flag = (self.registers[vx] & 0x80) >> 7; // Most significant bit
-				self.registers[vx] = (self.registers[vx] & 0x7F) << 1;
+				let flag = (self.registers[vy] & 0x80) >> 7; // Most significant bit
+				self.registers[vx] = (self.registers[vy] & 0x7F) << 1;
 				self.registers[0xF] = flag;
 			},
 			_ => println!("{:#06x?} not managed", op)
