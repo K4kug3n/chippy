@@ -19,36 +19,48 @@ impl Interpretor {
 		}
 	}
 
+	pub fn run(&mut self) {
+		while self.pc != self.program.len() {
+			let mut op : u16 = 0u16;
+        	op += u16::from(self.program[self.pc]) << 8;
+        	op += u16::from(self.program[self.pc + 1]);
+			
+            self.decode(op);
+
+            self.pc += 2;
+		}
+	}
+
 	fn decode(&mut self, op: u16) {
 		let first_byte = op & 0xF000;
 
 		match first_byte {
 			0x0000 => self.decode_0(op),
-			0x1000 => { println!("Need {} opcode", op) },
-			0x2000 => { println!("Need {} opcode", op) },
-			0x3000 => { println!("Need {} opcode", op) },
-			0x4000 => { println!("Need {} opcode", op) },
-			0x5000 => { println!("Need {} opcode", op) },
+			0x1000 => { println!("Need {:#06x?} opcode", op) },
+			0x2000 => { println!("Need {:#06x?} opcode", op) },
+			0x3000 => { println!("Need {:#06x?} opcode", op) },
+			0x4000 => { println!("Need {:#06x?} opcode", op) },
+			0x5000 => { println!("Need {:#06x?} opcode", op) },
 			0x6000 => {
 				// 0x6XNN
 				let index = usize::from((op & 0x0F00) >> 8);
 				let value = u8::try_from(op & 0x00FF).unwrap();
 				self.registers[index] = value;
 			},
-			0x7000 => { println!("Need {} opcode", op) },
-			0x8000 => { println!("Need {} opcode", op) },
-			0x9000 => { println!("Need {} opcode", op) },
+			0x7000 => { println!("Need {:#06x?} opcode", op) },
+			0x8000 => { println!("Need {:#06x?} opcode", op) },
+			0x9000 => { println!("Need {:#06x?} opcode", op) },
 			0xA000 => {
 				// 0xANNN
 				let value = op & 0x0FFF;
 				self.i = value;
 			},
-			0xB000 => { println!("Need {} opcode", op) },
-			0xC000 => { println!("Need {} opcode", op) },
+			0xB000 => { println!("Need {:#06x?} opcode", op) },
+			0xC000 => { println!("Need {:#06x?} opcode", op) },
 			0xD000 => {
 				// 0xDXYN
 				let n = usize::from(op & 0x000F);
-				let sprite = &self.program[usize::from(self.i)..usize::from(self.i)+n];
+				let sprite = &self.program[usize::from(self.i / 8)..usize::from(self.i / 8)+n];
 				let vx_idx = usize::from((op & 0x0F00) >> 8);
 				let vy_idx = usize::from((op & 0x00F0) >> 4);
 
@@ -56,9 +68,9 @@ impl Interpretor {
 				let y = self.registers[vy_idx];
 				self.screen.draw(x, y, sprite);
 			},
-			0xE000 => { println!("Need {} opcode", op) },
-			0xF000 => { println!("Need {} opcode", op) },
-			_ => println!("{} not managed", op)
+			0xE000 => { println!("Need {:#06x?} opcode", op) },
+			0xF000 => { println!("Need {:#06x?} opcode", op) },
+			_ => println!("{:#06x?} not managed", op)
 		}
 	}
 
@@ -67,7 +79,7 @@ impl Interpretor {
 			0x0000 => {}, // Ignored
 			0x00E0 => { self.screen.clear() },
 			// 0x00EE
-			_ => println!("{} not managed", op)
+			_ => println!("{:#06x?} not managed", op)
 		}
 	}
 }
