@@ -317,6 +317,14 @@ impl Interpretor {
 		self.has_drawn
 	}
 
+	pub fn is_finished(&self) -> bool {
+		self.pc >= self.memory.len()
+	}
+
+	pub fn is_beeping(&self) -> bool {
+		self.sound_timer != 0
+	}
+
 	pub fn set_pressed(&mut self, key: usize) {
 		debug_assert!(key < self.keys.len());
 		
