@@ -1,7 +1,8 @@
 use crate::display::Display;
+use crate::memory::Memory;
 
 pub struct Interpretor {
-    program: Vec<u8>,
+    memory: Memory,
     screen: Display,
     registers: [u8; 16],
     i: u16,
@@ -11,23 +12,25 @@ pub struct Interpretor {
 impl Interpretor {
 	pub fn new(program: Vec<u8>) -> Interpretor {
 		Interpretor {
-			program: program,
+			memory: Memory::new(&program),
 			screen: Display::new(64, 32),
 			registers: [0; 16],
 			i: 0,
-			pc: 0
+			pc: 0x200
 		}
 	}
 
 	pub fn run(&mut self) {
-		while self.pc != self.program.len() {
-			let mut op : u16 = 0u16;
-        	op += u16::from(self.program[self.pc]) << 8;
-        	op += u16::from(self.program[self.pc + 1]);
-			
+		let mut cycle = 0;
+		while self.pc != self.memory.len() {
+			let op : u16 = self.memory.read_opcode(self.pc);
+
             self.decode(op);
 
-            self.pc += 2;
+			println!("{:#06x?}", op);
+
+            self.pc += 16;
+			cycle += 1;
 		}
 	}
 
@@ -38,7 +41,7 @@ impl Interpretor {
 			0x0000 => self.decode_0(op),
 			0x1000 => { 
 				// 0x1NNN
-				self.pc = usize::from((op & 0x0FFF) / 8) / 2; // Not sure
+				self.pc = usize::from(op & 0x0FFF);
 			},
 			0x2000 => { println!("Need {:#06x?} opcode", op) },
 			0x3000 => { println!("Need {:#06x?} opcode", op) },
@@ -63,7 +66,7 @@ impl Interpretor {
 			0xD000 => {
 				// 0xDXYN
 				let n = usize::from(op & 0x000F);
-				let sprite = &self.program[usize::from(self.i / 8)..usize::from(self.i / 8)+n];
+				let sprite = self.memory.read_bytes(usize::from(self.i), n);
 				let vx_idx = usize::from((op & 0x0F00) >> 8);
 				let vy_idx = usize::from((op & 0x00F0) >> 4);
 
