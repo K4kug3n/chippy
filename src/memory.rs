@@ -63,7 +63,10 @@ impl Memory {
 	}
 }
 
+#[cfg(test)]
 mod tests {
+	use super::*;
+
     #[test]
 	fn test_get_font_adress() {
 		let memory = Memory::new(&[]);
