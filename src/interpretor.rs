@@ -35,7 +35,7 @@ impl Interpretor {
 	pub fn cycle(&mut self) {
 		let op : u16 = self.memory.read_opcode(self.pc);
 		self.decode(op);
-		self.pc += 16;
+		self.pc += 2;
 	}
 
 	fn decode(&mut self, op: u16) {
@@ -46,6 +46,7 @@ impl Interpretor {
 			0x1000 => { 
 				// 0x1NNN
 				self.pc = usize::from(op & 0x0FFF);
+				self.pc -= 2; // Prepare increment
 			},
 			0x2000 => { println!("Need {:#06x?} opcode", op) },
 			0x3000 => { println!("Need {:#06x?} opcode", op) },
@@ -57,13 +58,17 @@ impl Interpretor {
 				let value = u8::try_from(op & 0x00FF).unwrap();
 				self.registers[index] = value;
 			},
-			0x7000 => { println!("Need {:#06x?} opcode", op) },
+			0x7000 => { 
+				// 0x7XNN
+				let index = usize::from((op & 0x0F00) >> 8);
+				let value = u8::try_from(op & 0x00FF).unwrap();
+				self.registers[index] += value;
+			},
 			0x8000 => { println!("Need {:#06x?} opcode", op) },
 			0x9000 => { println!("Need {:#06x?} opcode", op) },
 			0xA000 => {
 				// 0xANNN
-				let value = op & 0x0FFF;
-				self.i = value;
+				self.i = op & 0x0FFF;
 			},
 			0xB000 => { println!("Need {:#06x?} opcode", op) },
 			0xC000 => { println!("Need {:#06x?} opcode", op) },
