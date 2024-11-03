@@ -283,7 +283,9 @@ impl Interpretor {
 			0x1E => { 
 				self.i += u16::from(self.registers[vx])
 			},
-			0x29 => { println!("Need {:#06x?} opcode", op) },
+			0x29 => { 
+				self.i = u16::try_from(self.memory.get_font_adress(self.registers[vx])).unwrap();
+			},
 			0x33 => {
 				let value = self.registers[vx];
 
