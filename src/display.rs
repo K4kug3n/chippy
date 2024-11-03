@@ -20,7 +20,7 @@ impl Display {
 		self.buffer = vec![0; self.buffer.len()];
 	}
 
-	pub fn draw(&mut self, x: u8, y: u8, sprite: &Vec<u8>) {
+	pub fn draw(&mut self, x: u8, y: u8, sprite: &[u8]) {
 		debug_assert!(x < self.width && y < self.height);
 
 		let shift = x % 8;
