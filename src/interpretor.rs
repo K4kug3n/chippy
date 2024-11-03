@@ -91,7 +91,8 @@ impl Interpretor {
 				// 0x7XNN
 				let index = usize::from((op & 0x0F00) >> 8);
 				let value = u8::try_from(op & 0x00FF).unwrap();
-				self.registers[index] += value;
+
+				self.registers[index] = u8::wrapping_add(self.registers[index], value);
 			},
 			0x8000 => self.decode_8(op),
 			0x9000 => {
@@ -155,20 +156,41 @@ impl Interpretor {
 				self.registers[vx] ^= self.registers[vy];
 			},
 			0x4 => {
-				self.registers[vx] += self.registers[vy];
-				// Check carry
+				let res = u8::overflowing_add(self.registers[vx], self.registers[vy]);
+				self.registers[vx] = res.0;
+
+				if res.1 {
+					self.registers[0xF] = 1;
+				}
+				else {
+					self.registers[0xF] = 0;
+				}
 			},
 			0x5 => {
-				self.registers[vx] -= self.registers[vy];
-				// Check borrow
+				let res = u8::overflowing_sub(self.registers[vx], self.registers[vy]);
+				self.registers[vx] = res.0;
+				
+				if res.1 {
+					self.registers[0xF] = 0;
+				}
+				else {
+					self.registers[0xF] = 1;
+				}
 			},
 			0x6 => {
 				self.registers[0xF] = self.registers[vx] & 0x0001; // Least significant bit
 				self.registers[vx] >>= 1;
 			},
 			0x7 => {
-				self.registers[vx] = self.registers[vy] - self.registers[vx];
-				// Check borrow
+				let res = u8::overflowing_sub(self.registers[vy], self.registers[vx]);
+				self.registers[vx] = res.0;
+				
+				if res.1 {
+					self.registers[0xF] = 0;
+				}
+				else {
+					self.registers[0xF] = 1;
+				}
 			},
 			0xE => {
 				self.registers[0xF] = (self.registers[vx] & 0x80) >> 7; // Most significant bit
