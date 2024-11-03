@@ -36,6 +36,26 @@ impl Display {
 			self.buffer[((usize::from(y) + i) % usize::from(self.height)) * (usize::from(self.width) / 8) + second_part / 8] ^= second_value;
 		}
 	}
+
+	pub fn get(&self, x: usize, y: usize) -> u8 
+	{
+		debug_assert!(x < usize::from(self.width) && y < usize::from(self.height));
+		let offset = x % 8;
+		let x_idx = (x - offset) / 8;
+
+		let byte = self.buffer[y * usize::from(self.width) / 8 + x_idx];
+		let value = (byte >> (8 - 1 - offset)) & 0x01;
+
+		value
+	}
+
+	pub fn height(&self) -> u8 {
+		self.height
+	}
+
+	pub fn width(&self) -> u8 {
+		self.width
+	}
 }
 
 #[cfg(test)]
