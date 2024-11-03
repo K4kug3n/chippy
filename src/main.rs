@@ -5,7 +5,7 @@ use chippy::interpretor::Interpretor;
 use minifb::{Key, Window, WindowOptions};
 
 fn main() {
-    let mut file = File::open("examples/1-chip8-logo.ch8").expect("Could not read the file {}");
+    let mut file = File::open("examples/2-ibm-logo.ch8").expect("Could not read the file {}");
     
     let mut buffer = Vec::new();
     file.read_to_end(&mut buffer).expect("Could not read bytes");
@@ -24,10 +24,9 @@ fn main() {
 
     let mut interpretor = Interpretor::new(buffer);
 
-
-    const pixel_size : usize = 16;
-    let window_width = interpretor.screen_width() * pixel_size;
-    let window_height = interpretor.screen_height() * pixel_size;
+    const PIXEL_SIZE : usize = 16;
+    let window_width = interpretor.screen_width() * PIXEL_SIZE;
+    let window_height = interpretor.screen_height() * PIXEL_SIZE;
     let mut pixels: Vec<u32> = vec![0; window_width * window_height];
     
     let mut window = Window::new(
@@ -44,8 +43,8 @@ fn main() {
 
         for y in 0..window_height {
             for x in 0..window_width {
-                let i = x / pixel_size;
-                let j = y / pixel_size;
+                let i = x / PIXEL_SIZE;
+                let j = y / PIXEL_SIZE;
 
                 if interpretor.screen_value(i, j) != 0 {
                     pixels[y * window_width + x] = 0x096096FF;
