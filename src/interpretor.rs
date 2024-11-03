@@ -179,8 +179,11 @@ impl Interpretor {
 				}
 			},
 			0x6 => {
-				self.registers[0xF] = self.registers[vx] & 0x0001; // Least significant bit
+				let flag = self.registers[vy] & 1; // Least significant bit
 				self.registers[vx] >>= 1;
+
+				self.registers[0xF] = flag;
+				
 			},
 			0x7 => {
 				let res = u8::overflowing_sub(self.registers[vy], self.registers[vx]);
@@ -194,8 +197,9 @@ impl Interpretor {
 				}
 			},
 			0xE => {
-				self.registers[0xF] = (self.registers[vx] & 0x80) >> 7; // Most significant bit
+				let flag = (self.registers[vx] & 0x80) >> 7; // Most significant bit
 				self.registers[vx] = (self.registers[vx] & 0x7F) << 1;
+				self.registers[0xF] = flag;
 			},
 			_ => println!("{:#06x?} not managed", op)
 		}
