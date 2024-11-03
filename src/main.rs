@@ -74,16 +74,17 @@ fn main() {
 
         interpretor.cycle();
 
-        for y in 0..window_height {
-            for x in 0..window_width {
-                let i = x / PIXEL_SIZE;
-                let j = y / PIXEL_SIZE;
+        for y in 0..interpretor.screen_height() {
+            let window_y = y * PIXEL_SIZE;
+            for x in 0..interpretor.screen_width() {
+                let window_x = x * PIXEL_SIZE;
 
-                if interpretor.screen_value(i, j) != 0 {
-                    pixels[y * window_width + x] = 0x096096FF;
-                }
-                else {
-                    pixels[y * window_width + x] = 0x09609680;
+                let color = if interpretor.screen_value(x, y) != 0 { 0x096096FF } else { 0x09609680 };
+
+                for j in 0..PIXEL_SIZE {
+                    for i in 0..PIXEL_SIZE {
+                        pixels[(window_y + j) * window_width + window_x + i] = color;
+                    }
                 }
             }
         }
