@@ -33,6 +33,8 @@ fn main() {
         panic!("{}", e);
     });
 
+    window.limit_update_rate(None);
+
     while window.is_open() && !window.is_key_down(Key::Escape) && !interpretor.is_finished() {
         
         window.get_keys_pressed(minifb::KeyRepeat::No).iter().for_each(|key|
