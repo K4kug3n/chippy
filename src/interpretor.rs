@@ -10,6 +10,7 @@ pub struct Interpretor {
 	delay_timer: u8,
 	sound_timer: u8,
 	has_drawn: bool,
+	blocked: bool,
     i: u16,
 	pc: usize
 }
@@ -25,6 +26,7 @@ impl Interpretor {
 			delay_timer: 0,
 			sound_timer: 0,
 			has_drawn: false,
+			blocked: false,
 			i: 0,
 			pc: 0x200
 		}
@@ -241,14 +243,25 @@ impl Interpretor {
 			0x07 => {
 				self.registers[vx] = self.delay_timer;
 			},
-			0x0A => { 
-				if self.keys.into_iter().any(|x| x) {
-					let key = self.keys.into_iter().position(|x| x).unwrap();
-
-					self.registers[vx] = u8::try_from(key).unwrap();
+			0x0A => {
+				if self.blocked {
+					if self.keys.into_iter().any(|x| x) {
+						// Not released so stay
+						self.pc -= 2;
+					}
+					else {
+						self.blocked = false;
+					}
 				}
 				else {
-					self.pc -= 2; // Block on this opcode
+					if self.keys.into_iter().any(|x| x) {
+						let key = self.keys.into_iter().position(|x| x).unwrap();
+	
+						self.registers[vx] = u8::try_from(key).unwrap();
+						self.blocked = true;
+					}
+
+					self.pc -= 2; // Stay
 				}
 			},
 			0x15 => { 
